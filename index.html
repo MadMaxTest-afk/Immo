@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculatrice de Frais Immobiliers</title>
+    <title>Giga flemme d'utiliser un calepin</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -14,116 +15,306 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: #e0f7fa;
+            background: linear-gradient(135deg, #e0f7fa, #80deea);
+            color: #333;
         }
+
+        h1 {
+            text-align: center;
+            color: #00796b;
+            margin-top: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
         .container {
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
             justify-content: center;
-            align-items: flex-start;
+            align-items: center;
             flex-wrap: wrap;
             max-width: 1200px;
             margin: 20px;
+            gap: 20px;
+            width: 100%;
         }
-        .calculator, .chart-container {
-            width: 350px;
-            background-color: #fff;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
+
+        .content {
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        @media (min-width: 768px) {
+            .content {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+        }
+
+        .calculator, .chart-result-container {
+            width: 100%;
+            max-width: 400px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
             padding: 20px;
             margin: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+
+        .calculator:hover, .chart-result-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        #map {
+            width: 100%;
+            height: 400px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
         .calculator h2 {
             text-align: center;
             color: #00796b;
+            margin-bottom: 20px;
+            font-size: 1.5em;
         }
-        .calculator input {
+
+        .calculator input[type="number"],
+        .calculator input[type="text"],
+        .calculator input[type="tel"] {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             margin: 10px 0;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: 8px;
             font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
         }
+
+        .calculator input[type="number"]:focus,
+        .calculator input[type="text"]:focus,
+        .calculator input[type="tel"]:focus {
+            border-color: #00796b;
+            outline: none;
+        }
+
+        .criteria-container {
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .criteria-container h3 {
+            color: #00796b;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .criteria-container div {
+            margin: 8px 0;
+        }
+
+        .calculator label {
+            font-size: 14px;
+            color: #555;
+        }
+
         .calculator button {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             background-color: #00796b;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
             margin-top: 10px;
             font-size: 16px;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
+
         .calculator button:hover {
             background-color: #004d40;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
         }
+
         .result {
+            width: 100%;
             margin-top: 20px;
             font-size: 14px;
             background-color: #e0f2f1;
-            padding: 10px;
-            border-radius: 4px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+        }
+
+        .result p {
+            margin: 8px 0;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
+    <h1>Giga flemme d'utiliser un calepin</h1>
+    
     <div class="container">
-        <div class="calculator">
-            <h2>Calculatrice Immobilière</h2>
-            <input type="number" id="prixAchat" placeholder="Entrez le prix d'achat" />
-            <input type="number" id="apport" placeholder="Entrez l'apport personnel" />
-            <button onclick="calculerFrais()">Calculer</button>
-            <div class="result" id="resultat">
-                <!-- Les résultats s'afficheront ici -->
+        <div class="content">
+            <div class="calculator">
+                <h2>Calculatrice Immobilière</h2>
+                <input type="text" id="titreProjet" placeholder="Titre du projet immobilier" />
+                <input type="text" id="nomAgent" placeholder="Nom et Prénom de l'agent immobilier" />
+                <input type="tel" id="telAgent" placeholder="Numéro de téléphone de l'agent immobilier" />
+                <input type="number" id="prixAchat" placeholder="Entrez le prix d'achat" />
+                <input type="number" id="apport" placeholder="Entrez l'apport personnel" />
+
+                <div class="criteria-container">
+                    <h3>Critères</h3>
+                    <div>
+                        <input type="checkbox" id="balconExploitable" />
+                        <label for="balconExploitable">Un balcon exploitable</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="troisiemeChambre" />
+                        <label for="troisiemeChambre">Une troisième chambre</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="fibre" />
+                        <label for="fibre">La fibre</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="dpeC" />
+                        <label for="dpeC">DPE C mini</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="bonVoisinage" />
+                        <label for="bonVoisinage">Bon voisinage</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="bonneLocalisation" />
+                        <label for="bonneLocalisation">Bonne localisation</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="chargesCopropriete" />
+                        <label for="chargesCopropriete">Charges de copropriété en-dessous des 200 euros par mois</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="bonDeroulementVisite" />
+                        <label for="bonDeroulementVisite">Bon déroulement de la visite</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="margeNegociation" />
+                        <label for="margeNegociation">Marge de négociation</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="bonEtatElectricite" />
+                        <label for="bonEtatElectricite">Bon état de l'électricité</label>
+                    </div>
+                </div>
+
+                <input type="text" id="addressInput" placeholder="Entrez une adresse pour géolocaliser" />
+                <button onclick="geocodeAddress()">Géolocaliser</button>
+
+                <button onclick="calculerFrais()">Calculer</button>
+                <button onclick="sauvegarderPDF()">Sauvegarder en PDF</button>
             </div>
-            <button onclick="sauvegarderPDF()">Sauvegarder en PDF</button>
+            
+            <div class="chart-result-container">
+                <canvas id="myPieChart"></canvas>
+                <div id="resultat" class="result">
+                    <p>Entrez les données pour voir les résultats ici.</p>
+                </div>
+            </div>
         </div>
-        <div class="chart-container">
-            <canvas id="myPieChart"></canvas>
-        </div>
+        <div id="map"></div>
     </div>
 
-    <!-- Inclusion de Chart.js et jsPDF -->
+    <!-- Inclusion de Chart.js, Leaflet et jsPDF -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.0/jspdf.umd.min.js"></script>
     <script>
         var myPieChart;
+        var map = L.map('map').setView([48.8566, 2.3522], 13);
+        var marker;
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        marker = L.marker([48.8566, 2.3522]).addTo(map);
+        marker.bindPopup("<b>Localisation du bien</b><br>Coordonnées par défaut.").openPopup();
+
+        function geocodeAddress() {
+            var address = document.getElementById('addressInput').value;
+            if (address.trim() !== "") {
+                var url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.length > 0) {
+                            var lat = parseFloat(data[0].lat);
+                            var lon = parseFloat(data[0].lon);
+                            map.setView([lat, lon], 13);
+                            marker.setLatLng([lat, lon]);
+                            marker.bindPopup(`<b>Localisation du bien</b><br>Adresse: ${address}`).openPopup();
+                        } else {
+                            alert("Adresse introuvable. Veuillez réessayer.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Erreur lors du géocodage:", error);
+                        alert("Erreur lors du géocodage de l'adresse.");
+                    });
+            } else {
+                alert("Veuillez entrer une adresse valide.");
+            }
+        }
 
         function calculerFrais() {
-            // Récupérer les valeurs saisies par l'utilisateur
             var prixAchat = parseFloat(document.getElementById('prixAchat').value);
             var apport = parseFloat(document.getElementById('apport').value);
 
-            // Si l'apport n'est pas un nombre, on le considère comme 0
             if (isNaN(apport)) {
                 apport = 0;
             }
 
-            // Définir les frais fixes de courtier
             var fraisCourtier = 2000;
-
-            // Calculer les frais de notaire (8%) et les frais d'agence (5%)
             var fraisNotaire = prixAchat * 0.08;
             var fraisAgence = prixAchat * 0.05;
-
-            // Calculer le total à payer
             var total = prixAchat + fraisNotaire + fraisAgence + fraisCourtier;
-
-            // Calculer le montant après apport
             var montantApresApport = total - apport;
-
-            // Calculer le pourcentage de l'apport par rapport au prix d'achat
             var pourcentageApport = (apport / prixAchat) * 100;
 
-            // Fonction pour formater les nombres en format français
             function formatNombre(nombre) {
                 return nombre.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
             }
 
-            // Afficher les résultats
             document.getElementById('resultat').innerHTML = `
                 <p>Frais de notaire (8%) : ${formatNombre(fraisNotaire)} €</p>
                 <p>Frais d'agence (5%) : ${formatNombre(fraisAgence)} €</p>
@@ -133,14 +324,12 @@
                 <p>Apport représente : ${pourcentageApport.toFixed(2)}% du prix du bien</p>
             `;
 
-            // Préparation des données pour le graphique
             var data = [apport, fraisNotaire, fraisAgence, fraisCourtier, montantApresApport];
             var labels = ['Apport', 'Frais de Notaire', 'Frais d\'Agence', 'Frais de Courtier', 'Montant Restant'];
 
-            // Mise à jour ou création du graphique en camembert
             var ctx = document.getElementById('myPieChart').getContext('2d');
             if (myPieChart) {
-                myPieChart.destroy(); // Détruire le graphique précédent s'il existe
+                myPieChart.destroy();
             }
             myPieChart = new Chart(ctx, {
                 type: 'pie',
@@ -176,15 +365,67 @@
             const { jsPDF } = window.jspdf;
             var doc = new jsPDF();
 
-            // Récupérer les résultats affichés
+            var titreProjet = document.getElementById('titreProjet').value || "Projet Immobilier";
+            var nomAgent = document.getElementById('nomAgent').value || "Nom de l'agent non renseigné";
+            var telAgent = document.getElementById('telAgent').value || "Téléphone non renseigné";
+            var location = marker.getLatLng();
+
+            var date = new Date();
+            var dateStr = date.toLocaleDateString('fr-FR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            var heureStr = date.toLocaleTimeString('fr-FR');
+
             var resultatTexte = document.getElementById('resultat').innerText;
 
-            // Ajouter les résultats au PDF
-            doc.text("Résultats de la Calculatrice Immobilière", 10, 10);
-            doc.text(resultatTexte, 10, 20);
+            var criteres = `
+                Un balcon exploitable: ${document.getElementById('balconExploitable').checked ? 'Oui' : 'Non'}
+                Une troisième chambre: ${document.getElementById('troisiemeChambre').checked ? 'Oui' : 'Non'}
+                La fibre: ${document.getElementById('fibre').checked ? 'Oui' : 'Non'}
+                DPE C mini: ${document.getElementById('dpeC').checked ? 'Oui' : 'Non'}
+                Bon voisinage: ${document.getElementById('bonVoisinage').checked ? 'Oui' : 'Non'}
+                Bonne localisation: ${document.getElementById('bonneLocalisation').checked ? 'Oui' : 'Non'}
+                Charges de copropriété en-dessous des 200 euros par mois: ${document.getElementById('chargesCopropriete').checked ? 'Oui' : 'Non'}
+                Bon déroulement de la visite: ${document.getElementById('bonDeroulementVisite').checked ? 'Oui' : 'Non'}
+                Marge de négociation: ${document.getElementById('margeNegociation').checked ? 'Oui' : 'Non'}
+                Bon état de l'électricité: ${document.getElementById('bonEtatElectricite').checked ? 'Oui' : 'Non'}
+            `;
 
-            // Générer et télécharger le PDF
-            doc.save('resultat_calculatrice_immobiliere.pdf');
+            doc.setFontSize(12);
+            doc.text(`Date: ${dateStr} ${heureStr}`, 10, 10);
+            doc.setFontSize(16);
+            doc.setFont("helvetica", "bold");
+            doc.text(titreProjet, 10, 20);
+
+            doc.setFontSize(14);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Agent immobilier: ${nomAgent}`, 10, 30);
+            doc.text(`Téléphone: ${telAgent}`, 10, 40);
+            doc.text(`Localisation: ${location.lat.toFixed(5)}, ${location.lng.toFixed(5)}`, 10, 50);
+
+            doc.text("Résultats de la Calculatrice Immobilière", 10, 60);
+            doc.setDrawColor(0, 0, 0);
+            doc.line(10, 62, 200, 62);
+
+            var yPosition = 70;
+            var lines = resultatTexte.split('\n');
+            lines.forEach(function(line) {
+                doc.text(line, 10, yPosition);
+                yPosition += 10;
+            });
+
+            doc.text("Critères Sélectionnés:", 10, yPosition);
+            doc.line(10, yPosition + 2, 200, yPosition + 2);
+            yPosition += 10;
+            var criteresLines = criteres.split('\n');
+            criteresLines.forEach(function(line) {
+                doc.text(line.trim(), 10, yPosition);
+                yPosition += 10;
+            });
+
+            doc.save(`${titreProjet.replace(/ /g, "_")}_resultat.pdf`);
         }
     </script>
 </body>

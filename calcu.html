@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculatrice de Frais Immobiliers</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #e0f7fa;
+        }
+        .container {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 20px;
+        }
+        .calculator, .chart-container {
+            width: 350px;
+            background-color: #fff;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px;
+        }
+        .calculator h2 {
+            text-align: center;
+            color: #00796b;
+        }
+        .calculator input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .calculator button {
+            width: 100%;
+            padding: 10px;
+            background-color: #00796b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        .calculator button:hover {
+            background-color: #004d40;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 14px;
+            background-color: #e0f2f1;
+            padding: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="calculator">
+            <h2>Calculatrice Immobilière</h2>
+            <input type="number" id="prixAchat" placeholder="Entrez le prix d'achat" />
+            <input type="number" id="apport" placeholder="Entrez l'apport personnel" />
+            <button onclick="calculerFrais()">Calculer</button>
+            <div class="result" id="resultat">
+                <!-- Les résultats s'afficheront ici -->
+            </div>
+            <button onclick="sauvegarderPDF()">Sauvegarder en PDF</button>
+        </div>
+        <div class="chart-container">
+            <canvas id="myPieChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Inclusion de Chart.js et jsPDF -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.0/jspdf.umd.min.js"></script>
+    <script>
+        var myPieChart;
+
+        function calculerFrais() {
+            // Récupérer les valeurs saisies par l'utilisateur
+            var prixAchat = parseFloat(document.getElementById('prixAchat').value);
+            var apport = parseFloat(document.getElementById('apport').value);
+
+            // Si l'apport n'est pas un nombre, on le considère comme 0
+            if (isNaN(apport)) {
+                apport = 0;
+            }
+
+            // Définir les frais fixes de courtier
+            var fraisCourtier = 2000;
+
+            // Calculer les frais de notaire (8%) et les frais d'agence (5%)
+            var fraisNotaire = prixAchat * 0.08;
+            var fraisAgence = prixAchat * 0.05;
+
+            // Calculer le total à payer
+            var total = prixAchat + fraisNotaire + fraisAgence + fraisCourtier;
+
+            // Calculer le montant après apport
+            var montantApresApport = total - apport;
+
+            // Calculer le pourcentage de l'apport par rapport au prix d'achat
+            var pourcentageApport = (apport / prixAchat) * 100;
+
+            // Fonction pour formater les nombres en format français
+            function formatNombre(nombre) {
+                return nombre.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+            }
+
+            // Afficher les résultats
+            document.getElementById('resultat').innerHTML = `
+                <p>Frais de notaire (8%) : ${formatNombre(fraisNotaire)} €</p>
+                <p>Frais d'agence (5%) : ${formatNombre(fraisAgence)} €</p>
+                <p>Frais de courtier : ${formatNombre(fraisCourtier)} €</p>
+                <p>Total à payer : ${formatNombre(total)} €</p>
+                <p><strong>Montant après apport : ${formatNombre(montantApresApport)} €</strong></p>
+                <p>Apport représente : ${pourcentageApport.toFixed(2)}% du prix du bien</p>
+            `;
+
+            // Préparation des données pour le graphique
+            var data = [apport, fraisNotaire, fraisAgence, fraisCourtier, montantApresApport];
+            var labels = ['Apport', 'Frais de Notaire', 'Frais d\'Agence', 'Frais de Courtier', 'Montant Restant'];
+
+            // Mise à jour ou création du graphique en camembert
+            var ctx = document.getElementById('myPieChart').getContext('2d');
+            if (myPieChart) {
+                myPieChart.destroy(); // Détruire le graphique précédent s'il existe
+            }
+            myPieChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: ['#4CAF50', '#FF9800', '#F44336', '#2196F3', '#9C27B0'],
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(tooltipItem) {
+                                    var value = data[tooltipItem.dataIndex];
+                                    var total = data.reduce((a, b) => a + b, 0);
+                                    var pourcentage = ((value / total) * 100).toFixed(2);
+                                    return `${labels[tooltipItem.dataIndex]}: ${pourcentage}%`;
+                                }
+                            }
+                        },
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+        }
+
+        function sauvegarderPDF() {
+            const { jsPDF } = window.jspdf;
+            var doc = new jsPDF();
+
+            // Récupérer les résultats affichés
+            var resultatTexte = document.getElementById('resultat').innerText;
+
+            // Ajouter les résultats au PDF
+            doc.text("Résultats de la Calculatrice Immobilière", 10, 10);
+            doc.text(resultatTexte, 10, 20);
+
+            // Générer et télécharger le PDF
+            doc.save('resultat_calculatrice_immobiliere.pdf');
+        }
+    </script>
+</body>
+</html>

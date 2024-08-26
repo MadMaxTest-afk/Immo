@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giga flemme d'utiliser un calepin</title>
+    <!-- Inclusion de la feuille de style Leaflet pour les cartes -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
+        /* Style de base pour le corps de la page */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
@@ -19,6 +21,7 @@
             color: #333;
         }
 
+        /* Style pour le titre principal */
         h1 {
             text-align: center;
             color: #00796b;
@@ -27,6 +30,7 @@
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
 
+        /* Conteneur principal pour centrer et organiser les éléments */
         .container {
             display: flex;
             flex-direction: column;
@@ -39,6 +43,7 @@
             width: 100%;
         }
 
+        /* Conteneur pour le contenu principal (formulaire et résultats) */
         .content {
             display: flex;
             flex-direction: column;
@@ -50,6 +55,7 @@
             max-width: 1200px;
         }
 
+        /* Utilisation des media queries pour l'adaptation sur les écrans plus larges */
         @media (min-width: 768px) {
             .content {
                 flex-direction: row;
@@ -57,6 +63,7 @@
             }
         }
 
+        /* Styles pour les boîtes de calculatrice et de résultats */
         .calculator, .chart-result-container {
             width: 100%;
             max-width: 400px;
@@ -68,11 +75,13 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
+        /* Effets de survol pour les boîtes */
         .calculator:hover, .chart-result-container:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
         }
 
+        /* Style pour la carte Leaflet */
         #map {
             width: 100%;
             height: 400px;
@@ -81,6 +90,7 @@
             margin-top: 20px;
         }
 
+        /* Styles pour les en-têtes des sections */
         .calculator h2 {
             text-align: center;
             color: #00796b;
@@ -88,6 +98,7 @@
             font-size: 1.5em;
         }
 
+        /* Styles pour les champs de saisie */
         .calculator input[type="number"],
         .calculator input[type="text"],
         .calculator input[type="tel"] {
@@ -101,6 +112,7 @@
             transition: border-color 0.3s ease;
         }
 
+        /* Effets de focus pour les champs de saisie */
         .calculator input[type="number"]:focus,
         .calculator input[type="text"]:focus,
         .calculator input[type="tel"]:focus {
@@ -108,6 +120,7 @@
             outline: none;
         }
 
+        /* Conteneur pour les critères de sélection */
         .criteria-container {
             background-color: #f9f9f9;
             border: 1px solid #ccc;
@@ -117,21 +130,25 @@
             box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
+        /* Style des sous-titres des critères */
         .criteria-container h3 {
             color: #00796b;
             font-size: 1.2em;
             margin-bottom: 10px;
         }
 
+        /* Espacement entre les critères */
         .criteria-container div {
             margin: 8px 0;
         }
 
+        /* Styles des étiquettes */
         .calculator label {
             font-size: 14px;
             color: #555;
         }
 
+        /* Styles des boutons */
         .calculator button {
             width: 100%;
             padding: 12px;
@@ -146,11 +163,13 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
+        /* Effets de survol pour les boutons */
         .calculator button:hover {
             background-color: #004d40;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
         }
 
+        /* Styles pour le bloc de résultats */
         .result {
             width: 100%;
             margin-top: 20px;
@@ -163,12 +182,14 @@
             box-sizing: border-box;
         }
 
+        /* Style des paragraphes dans le bloc de résultats */
         .result p {
             margin: 8px 0;
             color: #333;
             font-weight: bold;
         }
 
+        /* Style pour le conteneur du graphique */
         .chart-container {
             width: 100%;
             height: 300px;
@@ -182,16 +203,22 @@
 <body>
     <h1>Giga flemme d'utiliser un calepin</h1>
     
+    <!-- Conteneur principal -->
     <div class="container">
+        <!-- Conteneur pour le formulaire et les résultats -->
         <div class="content">
+            <!-- Section de la calculatrice -->
             <div class="calculator">
                 <h2>Calculatrice Immobilière</h2>
+                <!-- Champs de saisie pour le titre du projet et les détails de l'agent immobilier -->
                 <input type="text" id="titreProjet" placeholder="Titre du projet immobilier" />
                 <input type="text" id="nomAgent" placeholder="Nom et Prénom de l'agent immobilier" />
                 <input type="tel" id="telAgent" placeholder="Numéro de téléphone de l'agent immobilier" />
+                <!-- Champs de saisie pour le prix d'achat et l'apport personnel -->
                 <input type="number" id="prixAchat" placeholder="Entrez le prix d'achat" />
                 <input type="number" id="apport" placeholder="Entrez l'apport personnel" />
 
+                <!-- Section pour les critères de sélection -->
                 <div class="criteria-container">
                     <h3>Critères</h3>
                     <div>
@@ -236,52 +263,64 @@
                     </div>
                 </div>
 
+                <!-- Champ de saisie pour l'adresse à géolocaliser -->
                 <input type="text" id="addressInput" placeholder="Entrez une adresse pour géolocaliser" />
+                <!-- Bouton pour lancer la géolocalisation -->
                 <button onclick="geocodeAddress()">Géolocaliser</button>
 
+                <!-- Bouton pour calculer les frais -->
                 <button onclick="calculerFrais()">Calculer</button>
+                <!-- Bouton pour sauvegarder les résultats en PDF -->
                 <button onclick="sauvegarderPDF()">Sauvegarder en PDF</button>
             </div>
             
+            <!-- Conteneur pour le graphique et les résultats -->
             <div class="chart-result-container">
+                <!-- Canevas pour le graphique en camembert -->
                 <canvas id="myPieChart"></canvas>
+                <!-- Bloc de résultats avec un message par défaut -->
                 <div id="resultat" class="result">
                     <p>Entrez les données pour voir les résultats ici.</p>
                 </div>
             </div>
         </div>
+        <!-- Carte Leaflet -->
         <div id="map"></div>
     </div>
 
-    <!-- Inclusion de Chart.js, Leaflet et jsPDF -->
+    <!-- Inclusion des bibliothèques Chart.js, Leaflet et jsPDF -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.0/jspdf.umd.min.js"></script>
     <script>
-        var myPieChart;
-        var map = L.map('map').setView([48.8566, 2.3522], 13);
+        // Initialisation de la carte Leaflet
+        var map = L.map('map').setView([48.8566, 2.3522], 13); // Coordonnées initiales centrées sur Paris
         var marker;
 
+        // Configuration des tuiles de la carte
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 18,
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
+        // Ajout d'un marqueur par défaut sur la carte
         marker = L.marker([48.8566, 2.3522]).addTo(map);
         marker.bindPopup("<b>Localisation du bien</b><br>Coordonnées par défaut.").openPopup();
 
+        // Fonction pour géolocaliser une adresse entrée par l'utilisateur
         function geocodeAddress() {
-            var address = document.getElementById('addressInput').value;
+            var address = document.getElementById('addressInput').value; // Récupère l'adresse entrée
             if (address.trim() !== "") {
+                // Appel à l'API Nominatim pour géocoder l'adresse
                 var url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
                 fetch(url)
                     .then(response => response.json())
                     .then(data => {
                         if (data && data.length > 0) {
-                            var lat = parseFloat(data[0].lat);
-                            var lon = parseFloat(data[0].lon);
-                            map.setView([lat, lon], 13);
-                            marker.setLatLng([lat, lon]);
+                            var lat = parseFloat(data[0].lat); // Latitude trouvée
+                            var lon = parseFloat(data[0].lon); // Longitude trouvée
+                            map.setView([lat, lon], 13); // Centrer la carte sur les nouvelles coordonnées
+                            marker.setLatLng([lat, lon]); // Déplacer le marqueur
                             marker.bindPopup(`<b>Localisation du bien</b><br>Adresse: ${address}`).openPopup();
                         } else {
                             alert("Adresse introuvable. Veuillez réessayer.");
@@ -296,25 +335,28 @@
             }
         }
 
+        // Fonction pour calculer les frais associés à l'achat immobilier
         function calculerFrais() {
-            var prixAchat = parseFloat(document.getElementById('prixAchat').value);
-            var apport = parseFloat(document.getElementById('apport').value);
+            var prixAchat = parseFloat(document.getElementById('prixAchat').value); // Récupère le prix d'achat
+            var apport = parseFloat(document.getElementById('apport').value); // Récupère l'apport personnel
 
             if (isNaN(apport)) {
-                apport = 0;
+                apport = 0; // Si l'apport n'est pas un nombre, le considérer comme 0
             }
 
-            var fraisCourtier = 2000;
-            var fraisNotaire = prixAchat * 0.08;
-            var fraisAgence = prixAchat * 0.05;
-            var total = prixAchat + fraisNotaire + fraisAgence + fraisCourtier;
-            var montantApresApport = total - apport;
-            var pourcentageApport = (apport / prixAchat) * 100;
+            var fraisCourtier = 2000; // Frais fixes de courtier
+            var fraisNotaire = prixAchat * 0.08; // Calcul des frais de notaire (8%)
+            var fraisAgence = prixAchat * 0.05; // Calcul des frais d'agence (5%)
+            var total = prixAchat + fraisNotaire + fraisAgence + fraisCourtier; // Calcul du total à payer
+            var montantApresApport = total - apport; // Montant restant après l'apport
+            var pourcentageApport = (apport / prixAchat) * 100; // Pourcentage de l'apport
 
+            // Fonction pour formater les nombres au format français
             function formatNombre(nombre) {
                 return nombre.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
             }
 
+            // Affichage des résultats dans le bloc prévu
             document.getElementById('resultat').innerHTML = `
                 <p>Frais de notaire (8%) : ${formatNombre(fraisNotaire)} €</p>
                 <p>Frais d'agence (5%) : ${formatNombre(fraisAgence)} €</p>
@@ -324,12 +366,14 @@
                 <p>Apport représente : ${pourcentageApport.toFixed(2)}% du prix du bien</p>
             `;
 
+            // Données pour le graphique en camembert
             var data = [apport, fraisNotaire, fraisAgence, fraisCourtier, montantApresApport];
             var labels = ['Apport', 'Frais de Notaire', 'Frais d\'Agence', 'Frais de Courtier', 'Montant Restant'];
 
+            // Initialisation et affichage du graphique avec Chart.js
             var ctx = document.getElementById('myPieChart').getContext('2d');
             if (myPieChart) {
-                myPieChart.destroy();
+                myPieChart.destroy(); // Détruire le graphique précédent s'il existe
             }
             myPieChart = new Chart(ctx, {
                 type: 'pie',
@@ -361,15 +405,17 @@
             });
         }
 
+        // Fonction pour sauvegarder les résultats sous forme de PDF
         function sauvegarderPDF() {
-            const { jsPDF } = window.jspdf;
+            const { jsPDF } = window.jspdf; // Utilisation de jsPDF pour créer le PDF
             var doc = new jsPDF();
 
             var titreProjet = document.getElementById('titreProjet').value || "Projet Immobilier";
             var nomAgent = document.getElementById('nomAgent').value || "Nom de l'agent non renseigné";
             var telAgent = document.getElementById('telAgent').value || "Téléphone non renseigné";
-            var location = marker.getLatLng();
+            var location = marker.getLatLng(); // Récupération des coordonnées du marqueur
 
+            // Formatage de la date et de l'heure au format français
             var date = new Date();
             var dateStr = date.toLocaleDateString('fr-FR', {
                 year: 'numeric',
@@ -378,8 +424,9 @@
             });
             var heureStr = date.toLocaleTimeString('fr-FR');
 
-            var resultatTexte = document.getElementById('resultat').innerText;
+            var resultatTexte = document.getElementById('resultat').innerText; // Texte des résultats
 
+            // Récupération des critères sélectionnés
             var criteres = `
                 Un balcon exploitable: ${document.getElementById('balconExploitable').checked ? 'Oui' : 'Non'}
                 Une troisième chambre: ${document.getElementById('troisiemeChambre').checked ? 'Oui' : 'Non'}
@@ -393,6 +440,7 @@
                 Bon état de l'électricité: ${document.getElementById('bonEtatElectricite').checked ? 'Oui' : 'Non'}
             `;
 
+            // Construction du PDF avec les informations collectées
             doc.setFontSize(12);
             doc.text(`Date: ${dateStr} ${heureStr}`, 10, 10);
             doc.setFontSize(16);
@@ -409,6 +457,7 @@
             doc.setDrawColor(0, 0, 0);
             doc.line(10, 62, 200, 62);
 
+            // Ajout des lignes de résultats dans le PDF
             var yPosition = 70;
             var lines = resultatTexte.split('\n');
             lines.forEach(function(line) {
@@ -416,6 +465,7 @@
                 yPosition += 10;
             });
 
+            // Ajout des critères sélectionnés dans le PDF
             doc.text("Critères Sélectionnés:", 10, yPosition);
             doc.line(10, yPosition + 2, 200, yPosition + 2);
             yPosition += 10;
@@ -425,6 +475,7 @@
                 yPosition += 10;
             });
 
+            // Sauvegarde du PDF sous le nom du projet
             doc.save(`${titreProjet.replace(/ /g, "_")}_resultat.pdf`);
         }
     </script>
